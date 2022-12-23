@@ -32,7 +32,11 @@ class Batch:
         pass
     
     def _can_allocate(self, orderline: OrderLine) -> bool:
-        return (self.available_qty >= orderline.qty) and not any(orderline.orderid == line.orderid for line in self.allocated_lines)
+        return (
+            (self.available_qty >= orderline.qty) 
+            and not any(orderline.orderid == line.orderid for line in self.allocated_lines)
+            and orderline.sku == self.sku
+        )
 
     def _allocate_line(self, orderline: OrderLine):
         self.allocated_lines.append(orderline)
