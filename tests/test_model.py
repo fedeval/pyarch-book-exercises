@@ -1,5 +1,5 @@
 import pytest
-from app.schemas import Batch, OrderLine
+from app.model import Batch, OrderLine
 
 @pytest.fixture
 def batch() -> Batch:
