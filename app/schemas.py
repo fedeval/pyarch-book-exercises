@@ -3,7 +3,7 @@ from datetime import datetime
 from dataclasses import dataclass
 
 
-@dataclass
+@dataclass(frozen=True)
 class OrderLine:
     orderid: str
     sku: str
@@ -19,25 +19,29 @@ class Batch:
     ) -> None:
         self.reference = reference
         self.sku = sku
-        self.available_qty = qty
+        self._purchased_qty = qty
         self.eta = eta
-        self.allocated_lines: list[OrderLine] = []
+        self._allocated_lines: set[OrderLine] = set()
     
     def allocate(self, orderline: OrderLine):
         if self._can_allocate(orderline):
-            self.available_qty -= orderline.qty
-            self._allocate_line(orderline)
+            self._allocated_lines.add(orderline)
 
     def deallocate(self, orderline: OrderLine):
-        pass
+        if orderline in self._allocated_lines:
+            self._allocated_lines.remove(orderline)
     
     def _can_allocate(self, orderline: OrderLine) -> bool:
         return (
-            (self.available_qty >= orderline.qty) 
-            and not any(orderline.orderid == line.orderid for line in self.allocated_lines)
+            (self.available_quantity >= orderline.qty) 
             and orderline.sku == self.sku
         )
 
-    def _allocate_line(self, orderline: OrderLine):
-        self.allocated_lines.append(orderline)
+    @property
+    def allocated_quantity(self):
+        return sum(line.qty for line in self._allocated_lines)
+        
+    @property
+    def available_quantity(self):
+        return self._purchased_qty - self.allocated_quantity
 
