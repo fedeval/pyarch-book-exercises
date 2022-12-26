@@ -62,6 +62,17 @@ class Batch:
         """
         return hash(self.reference)
     
+    def __gt__(self, other):
+        """
+        Defining this method allows us to use python's
+        built-in sorting methods.
+        """
+        if self.eta is None:
+            return False
+        elif other.eta is None:
+            return True
+        return self.eta > other.eta
+    
     def allocate(self, orderline: OrderLine) -> None:
         if self._can_allocate(orderline):
             self._allocated_lines.add(orderline)
